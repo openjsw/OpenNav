@@ -67,27 +67,30 @@ export async function onRequestGet({ request }) {
   <title>${t.adminTitle}</title>
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <style>
-    body{background:#f8f9fb;margin:0;display:flex;flex-direction:column;min-height:100vh;}
-    .loginbox{background:#fff;max-width:340px;margin:12vh auto 0 auto;padding:34px 26px 30px 26px;border-radius:12px;box-shadow:0 2px 12px #0001;}
+    body{background:#f7f8fa;margin:0;min-height:100vh;display:flex;flex-direction:column;}
+    .topbar{height:60px;}
+    .loginbox{background:#fff;max-width:340px;margin:16vh auto 0 auto;padding:38px 26px 30px 26px;border-radius:15px;box-shadow:0 4px 24px #0022.09;}
     h2{margin:0 0 18px 0;font-size:1.7em;}
     form{margin:0;}
-    input[type=password]{width:100%;padding:10px 12px;font-size:1em;border:1px solid #e0e2ee;border-radius:8px;margin-bottom:16px;}
-    button{width:100%;padding:10px;font-size:1.09em;background:#2563eb;color:#fff;border:none;border-radius:8px;cursor:pointer;}
+    input[type=password]{width:100%;padding:12px 13px;font-size:1em;border:1px solid #e0e2ee;border-radius:8px;margin-bottom:20px;box-sizing:border-box;}
+    button{width:100%;padding:12px;font-size:1.13em;background:#2563eb;color:#fff;border:none;border-radius:8px;cursor:pointer;}
     button:hover{background:#1e48c9;}
-    .lang{position:absolute;right:22px;top:18px;font-size:.95em;}
+    .desc{color:#888;margin-top:16px;font-size:.98em;}
+    .lang{position:absolute;right:32px;top:26px;font-size:.99em;color:#2563eb;text-decoration:none;}
+    .lang:hover{text-decoration:underline;}
     .err{color:#f33;margin-bottom:8px;}
-    @media (max-width:420px){.loginbox{margin-top:3vh;padding:22px 8px 16px 8px;}}
+    @media (max-width:420px){.loginbox{margin-top:6vh;padding:22px 8px 16px 8px;}}
   </style>
 </head>
 <body>
-  <a class="lang" href="?lang=${lang === "zh" ? "en" : "zh"}">${lang === "zh" ? "ENGLISH" : "简体中文"}</a>
+  <div class="topbar"><a class="lang" href="?lang=${lang === "zh" ? "en" : "zh"}">${lang === "zh" ? "ENGLISH" : "简体中文"}</a></div>
   <div class="loginbox">
     <h2>${t.adminTitle}</h2>
     <form method="post">
       <input name="password" type="password" placeholder="${t.passwordPlaceholder}" required autocomplete="current-password">
       <button type="submit">${t.loginBtn}</button>
     </form>
-    <div class="desc" style="color:#888;margin-top:14px;">${t.adminDesc}</div>
+    <div class="desc">${t.adminDesc}</div>
   </div>
 </body>
 </html>`, { headers: { "content-type": "text/html" } });
@@ -101,32 +104,105 @@ export async function onRequestGet({ request }) {
   <title>${t.adminTitle}</title>
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <style>
-    body{font-family:sans-serif;background:#f8f9fb;margin:0;display:flex;flex-direction:column;min-height:100vh;}
-    .logout{position:absolute;right:20px;top:18px;}
-    .container{max-width:720px;margin:0 auto;padding:34px 16px;flex:1;}
-    h2{margin-top:0;}
-    form[id="addForm"]{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:20px;}
-    form[id="addForm"] input{padding:6px 8px;border:1px solid #d3d7e2;border-radius:7px;font-size:.97em;}
-    form[id="addForm"] input[name="id"]{width:52px;}
-    form[id="addForm"] input[type="submit"]{background:#2563eb;color:#fff;border:none;border-radius:7px;cursor:pointer;padding:6px 20px;}
-    form[id="addForm"] input[type="submit"]:hover{background:#1748bb;}
-    table{width:100%;border-collapse:collapse;}
-    th,td{border:1px solid #e7eaf2;padding:7px 4px;font-size:.98em;}
+    body{font-family:system-ui,sans-serif;background:#f7f8fa;margin:0;min-height:100vh;display:flex;flex-direction:column;}
+    .admin-topbar{
+      width:100%;
+      max-width:980px;
+      margin:0 auto;
+      padding:28px 22px 0 22px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+    .admin-title {
+      font-size:1.5em;font-weight:700;letter-spacing:.03em;
+    }
+    .admin-actions {
+      font-size:1em;color:#2563eb;display:flex;align-items:center;gap:18px;
+    }
+    .admin-actions a {color:#2563eb;text-decoration:none;font-weight:500;}
+    .admin-actions a:hover {color:#1348b6;text-decoration:underline;}
+    .admin-maincard{
+      background:#fff;
+      border-radius:17px;
+      box-shadow:0 4px 24px #0022.08;
+      max-width:900px;
+      width:96vw;
+      margin:36px auto 0 auto;
+      padding:34px 28px 28px 28px;
+      display:flex;
+      flex-direction:column;
+      align-items:stretch;
+    }
+    form#addForm {
+      display:flex; flex-wrap:wrap; gap:12px 12px;margin-bottom:28px;
+    }
+    form#addForm input {
+      padding:10px 13px;
+      border:1px solid #e2e6ef;
+      border-radius:8px;
+      font-size:1em;
+      background:#f6f8fd;
+      min-width:115px;
+      flex:1 1 170px;
+      margin-bottom:8px;
+      transition:border-color .15s;
+    }
+    form#addForm input:focus {
+      border-color:#2563eb;
+      outline:none;
+      background:#f0f6ff;
+    }
+    form#addForm input[type="submit"] {
+      background:#2563eb;color:#fff;border:none;cursor:pointer;transition:.16s;min-width:86px;font-weight:600;margin-bottom:8px;
+    }
+    form#addForm input[type="submit"]:hover{background:#1748bb;}
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0 7px;
+      margin-top:14px;
+    }
+    th,td{
+      background:#fff;
+      padding:11px 8px;
+      border:none;
+      border-radius:7px;
+      text-align:left;
+      font-size:1em;
+    }
     th{background:#f3f6fa;}
-    .actions button{margin-right:7px;padding:3px 11px;}
-    .lang{position:absolute;right:90px;top:18px;}
-    footer { width:100%;text-align:center;color:#aaa;margin-top:auto;padding:18px 0 12px 0;font-size:.98em;letter-spacing:0.04em;}
+    .actions button{
+      margin-right:7px;padding:6px 17px;
+      border:none;border-radius:7px;
+      background:#f6f7fb;color:#1e48bb;cursor:pointer;transition:.16s;font-weight:500;
+    }
+    .actions button:hover{background:#dbeafe;color:#1348b6;}
+    .actions button:active{background:#a7c7fd;}
+    footer{
+      width:100%;text-align:center;color:#bbb;
+      margin-top:auto;padding:17px 0 10px 0;font-size:.99em;
+      letter-spacing:0.04em;
+    }
+    @media (max-width:900px){
+      .admin-maincard{padding:13px 2vw;}
+      .admin-topbar{padding:14px 7px 0 7px;}
+    }
     @media (max-width:700px){
-      .container{padding:10px 2px;}
-      form[id="addForm"] input{width:98%;}
+      form#addForm input{min-width:88px;}
+      .admin-maincard{padding:9px 3vw;}
     }
   </style>
 </head>
 <body>
-  <a href="/api/logout" class="logout">${t.logout}</a>
-  <a class="lang" href="?lang=${lang === "zh" ? "en" : "zh"}">${lang === "zh" ? "ENGLISH" : "简体中文"}</a>
-  <div class="container">
-    <h2>${t.adminTitle}</h2>
+  <div class="admin-topbar">
+    <span class="admin-title">${t.adminTitle}</span>
+    <span class="admin-actions">
+      <a href="?lang=${lang === "zh" ? "en" : "zh"}">${lang === "zh" ? "ENGLISH" : "简体中文"}</a>
+      <a href="/api/logout">${t.logout}</a>
+    </span>
+  </div>
+  <div class="admin-maincard">
     <form id="addForm">
       <input name="id" placeholder="${t.field.id}">
       <input name="name_zh" placeholder="${t.field.name_zh}" required>
