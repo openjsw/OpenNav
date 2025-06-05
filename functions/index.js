@@ -1,32 +1,27 @@
 export async function onRequestGet({ env, request }) {
-  // 获取 lang 参数
   const url = new URL(request.url);
   const lang = url.searchParams.get('lang') === 'en' ? 'en' : 'zh';
 
-  // 从 KV 读取项目数据
-  const data = await env.PROJECTS.get("list");
-  let projects;
-  try {
-    projects = JSON.parse(data || "[]");
-  } catch { projects = []; }
+  // D1 查询全部项目
+  const { results } = await env.DB.prepare(
+    "SELECT * FROM projects ORDER BY id DESC"
+  ).all();
 
   const langText = {
     zh: {
       title: '开源项目导航',
       powered: '由 OpenJSW 开放技术支持',
       switch: 'ENGLISH',
-      tag: '标签',
     },
     en: {
       title: 'Open Source Project Navigator',
       powered: 'Powered by OpenJSW',
       switch: '简体中文',
-      tag: 'Tags',
     }
   };
 
   function htmlEscape(str) {
-    return str.replace(/[&<>"']/g, t => ({
+    return (str||"").replace(/[&<>"']/g, t => ({
       '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
     }[t]));
   }
@@ -75,11 +70,11 @@ export async function onRequestGet({ env, request }) {
       <a class="lang-switch" href="${switchHref}">${langText[lang].switch}</a>
     </div>
     <div class="desc">${langText[lang].powered}</div>
-    ${projects.map(p=>`
+    ${results.map(p=>`
       <div class="card">
-        <a href="${htmlEscape(p.url)}" target="_blank">${htmlEscape(p.name[lang]||p.name.zh)}</a>
-        <div style="color:#666;margin:7px 0 0 2px;font-size:1em;">${htmlEscape(p.desc[lang]||p.desc.zh)}</div>
-        <div class="tags">${(p.tags||[]).map(t=>`<span class="tag">${htmlEscape(t)}</span>`).join('')}</div>
+        <a href="${htmlEscape(p.url)}" target="_blank">${htmlEscape(lang==='en'?p.name_en:p.name_zh)}</a>
+        <div style="color:#666;margin:7px 0 0 2px;font-size:1em;">${htmlEscape(lang==='en'?p.desc_en:p.desc_zh)}</div>
+        <div class="tags">${(p.tags||"").split(',').filter(x=>x.trim()).map(t=>`<span class="tag">${htmlEscape(t)}</span>`).join('')}</div>
       </div>
     `).join('')}
     <div style="text-align:center;color:#bbb;margin:40px 0 6px 0;font-size:.98em;">&copy; ${new Date().getFullYear()} OpenNav · OpenJSW</div>
