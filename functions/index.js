@@ -1,25 +1,29 @@
-export async function onRequestGet(context) {
-  const PROJECTS = [
-    {
-      name: "JSW 技术网",
-      desc: "专注云原生/Serverless/前端等技术，极简工具与知识导航。",
-      url: "https://jsw.ac.cn",
-      tags: ["云原生", "Serverless"]
+export async function onRequestGet({ env, request }) {
+  // 获取 lang 参数
+  const url = new URL(request.url);
+  const lang = url.searchParams.get('lang') === 'en' ? 'en' : 'zh';
+
+  // 从 KV 读取项目数据
+  const data = await env.PROJECTS.get("list");
+  let projects;
+  try {
+    projects = JSON.parse(data || "[]");
+  } catch { projects = []; }
+
+  const langText = {
+    zh: {
+      title: '开源项目导航',
+      powered: '由 OpenJSW 开放技术支持',
+      switch: 'ENGLISH',
+      tag: '标签',
     },
-    {
-      name: "Hexo",
-      desc: "快速、简洁且高效的博客框架",
-      url: "https://hexo.io/",
-      tags: ["博客", "静态"]
-    },
-    {
-      name: "Cloudflare Pages",
-      desc: "无服务器静态站点托管，支持自动部署。",
-      url: "https://pages.cloudflare.com/",
-      tags: ["Serverless", "CDN"]
-    },
-    // 可以继续扩展项目
-  ];
+    en: {
+      title: 'Open Source Project Navigator',
+      powered: 'Powered by OpenJSW',
+      switch: '简体中文',
+      tag: 'Tags',
+    }
+  };
 
   function htmlEscape(str) {
     return str.replace(/[&<>"']/g, t => ({
@@ -27,15 +31,19 @@ export async function onRequestGet(context) {
     }[t]));
   }
 
+  const switchLang = lang === 'zh' ? 'en' : 'zh';
+  const switchHref = url.pathname + '?lang=' + switchLang;
+
   const html = `<!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="${lang}">
 <head>
   <meta charset="UTF-8">
-  <title>OpenNav · 开源项目导航</title>
+  <title>${langText[lang].title}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body { font-family: system-ui,sans-serif; background: #f8f9fb; margin: 0; }
     .container { max-width: 660px; margin: 0 auto; padding: 24px 12px; }
+    .header { display:flex;align-items:center;justify-content:space-between;}
     h1 { font-size: 2.2em; margin-bottom: 10px; }
     .desc { color: #888; margin-bottom: 30px; }
     .card {
@@ -53,6 +61,7 @@ export async function onRequestGet(context) {
       color: #2575ed; border-radius: 8px; font-size: .9em;
       padding: 2px 10px; margin-right: 7px;
     }
+    .lang-switch {margin-left:8px;}
     @media (max-width:600px){
       .container{padding:10px;}
       .card{padding:13px 13px;}
@@ -61,21 +70,22 @@ export async function onRequestGet(context) {
 </head>
 <body>
   <div class="container">
-    <h1>OpenNav</h1>
-    <div class="desc">优质开源项目导航 · 由 OpenJSW 开放技术支持</div>
-    ${PROJECTS.map(p=>`
+    <div class="header">
+      <h1>${langText[lang].title}</h1>
+      <a class="lang-switch" href="${switchHref}">${langText[lang].switch}</a>
+    </div>
+    <div class="desc">${langText[lang].powered}</div>
+    ${projects.map(p=>`
       <div class="card">
-        <a href="${htmlEscape(p.url)}" target="_blank">${htmlEscape(p.name)}</a>
-        <div style="color:#666;margin:7px 0 0 2px;font-size:1em;">${htmlEscape(p.desc)}</div>
+        <a href="${htmlEscape(p.url)}" target="_blank">${htmlEscape(p.name[lang]||p.name.zh)}</a>
+        <div style="color:#666;margin:7px 0 0 2px;font-size:1em;">${htmlEscape(p.desc[lang]||p.desc.zh)}</div>
         <div class="tags">${(p.tags||[]).map(t=>`<span class="tag">${htmlEscape(t)}</span>`).join('')}</div>
       </div>
     `).join('')}
-    <div style="text-align:center;color:#bbb;margin:40px 0 6px 0;font-size:.98em;">&copy; ${new Date().getFullYear()} OpenNav · Powered by OpenJSW</div>
+    <div style="text-align:center;color:#bbb;margin:40px 0 6px 0;font-size:.98em;">&copy; ${new Date().getFullYear()} OpenNav · OpenJSW</div>
   </div>
 </body>
 </html>`;
 
-  return new Response(html, {
-    headers: { "content-type": "text/html; charset=UTF-8" }
-  });
+  return new Response(html, { headers: { "content-type": "text/html; charset=UTF-8" } });
 }
