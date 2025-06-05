@@ -1,38 +1,37 @@
-// index.js
-const PROJECTS = [
-  {
-    name: "JSW 技术网",
-    desc: "专注云原生/Serverless/前端等技术，极简工具与知识导航。",
-    url: "https://jsw.ac.cn",
-    tags: ["云原生", "Serverless"]
-  },
-  {
-    name: "Hexo",
-    desc: "快速、简洁且高效的博客框架",
-    url: "https://hexo.io/",
-    tags: ["博客", "静态"]
-  },
-  {
-    name: "Cloudflare Pages",
-    desc: "无服务器静态站点托管，支持自动部署。",
-    url: "https://pages.cloudflare.com/",
-    tags: ["Serverless", "CDN"]
-  },
-  // 你可以继续添加更多项目
-];
+export async function onRequestGet(context) {
+  const PROJECTS = [
+    {
+      name: "JSW 技术网",
+      desc: "专注云原生/Serverless/前端等技术，极简工具与知识导航。",
+      url: "https://jsw.ac.cn",
+      tags: ["云原生", "Serverless"]
+    },
+    {
+      name: "Hexo",
+      desc: "快速、简洁且高效的博客框架",
+      url: "https://hexo.io/",
+      tags: ["博客", "静态"]
+    },
+    {
+      name: "Cloudflare Pages",
+      desc: "无服务器静态站点托管，支持自动部署。",
+      url: "https://pages.cloudflare.com/",
+      tags: ["Serverless", "CDN"]
+    },
+    // 可以继续扩展项目
+  ];
 
-function htmlEscape(str) {
-  return str.replace(/[&<>"']/g, t => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  }[t]));
-}
+  function htmlEscape(str) {
+    return str.replace(/[&<>"']/g, t => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[t]));
+  }
 
-function renderPage(projects) {
-  return `<!DOCTYPE html>
+  const html = `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>开源项目导航</title>
+  <title>OpenNav · 开源项目导航</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body { font-family: system-ui,sans-serif; background: #f8f9fb; margin: 0; }
@@ -62,26 +61,21 @@ function renderPage(projects) {
 </head>
 <body>
   <div class="container">
-    <h1>开源项目导航</h1>
-    <div class="desc">优质项目推荐，开源工具集，持续更新中。</div>
-    ${projects.map(p=>`
+    <h1>OpenNav</h1>
+    <div class="desc">优质开源项目导航 · 由 OpenJSW 开放技术支持</div>
+    ${PROJECTS.map(p=>`
       <div class="card">
         <a href="${htmlEscape(p.url)}" target="_blank">${htmlEscape(p.name)}</a>
         <div style="color:#666;margin:7px 0 0 2px;font-size:1em;">${htmlEscape(p.desc)}</div>
         <div class="tags">${(p.tags||[]).map(t=>`<span class="tag">${htmlEscape(t)}</span>`).join('')}</div>
       </div>
     `).join('')}
-    <div style="text-align:center;color:#bbb;margin:40px 0 6px 0;font-size:.98em;">&copy; ${new Date().getFullYear()} 开源项目导航</div>
+    <div style="text-align:center;color:#bbb;margin:40px 0 6px 0;font-size:.98em;">&copy; ${new Date().getFullYear()} OpenNav · Powered by OpenJSW</div>
   </div>
 </body>
 </html>`;
-}
 
-export default {
-  async fetch(request, env, ctx) {
-    return new Response(
-      renderPage(PROJECTS),
-      { headers: { "content-type": "text/html; charset=UTF-8" } }
-    );
-  }
-};
+  return new Response(html, {
+    headers: { "content-type": "text/html; charset=UTF-8" }
+  });
+}
